@@ -15,13 +15,16 @@
  */
 package com.zhihu.matisse.internal.ui;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.zhihu.matisse.R;
 import com.zhihu.matisse.internal.entity.Item;
@@ -49,26 +52,48 @@ public class PreviewItemFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Item item = getArguments().getParcelable(ARGS_ITEM);
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        final Item item = getArguments().getParcelable(ARGS_ITEM);
+        if (item == null) {
+            return;
+        }
 
-        getView().findViewById(R.id.video_play_button).setVisibility(item.isVideo() ? View.VISIBLE : View.GONE);
+        View videoPlayButton = view.findViewById(R.id.video_play_button);
+        if (item.isVideo()) {
+            videoPlayButton.setVisibility(View.VISIBLE);
+            videoPlayButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(item.uri, "video/*");
+                    try {
+                        startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        Toast.makeText(getContext(), R.string.error_no_video_activity, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        } else {
+            videoPlayButton.setVisibility(View.GONE);
+        }
 
-        ImageViewTouch image = (ImageViewTouch) getView().findViewById(R.id.image_view);
+        ImageViewTouch image = (ImageViewTouch)view.findViewById(R.id.image_view);
         image.setDisplayType(ImageViewTouchBase.DisplayType.FIT_TO_SCREEN);
-        Point size = PhotoMetadataUtils.getBitmapSize(getActivity().getContentResolver(),
-                item.getContentUri(), getActivity());
+
+        Point size = PhotoMetadataUtils.getBitmapSize(item.getContentUri(), getActivity());
         if (item.isGif()) {
-            SelectionSpec.getInstance().imageEngine.loadAnimatedGifImage(getActivity(), size.x, size.y, image,
+            SelectionSpec.getInstance().imageEngine.loadAnimatedGifImage(getContext(), size.x, size.y, image,
                     item.getContentUri());
         } else {
-            SelectionSpec.getInstance().imageEngine.loadImage(getActivity(), size.x, size.y, image,
+            SelectionSpec.getInstance().imageEngine.loadImage(getContext(), size.x, size.y, image,
                     item.getContentUri());
         }
     }
 
     public void resetView() {
-        ((ImageViewTouch) getView().findViewById(R.id.image_view)).resetMatrix();
+        if (getView() != null) {
+            ((ImageViewTouch) getView().findViewById(R.id.image_view)).resetMatrix();
+        }
     }
 }
