@@ -19,9 +19,9 @@ package com.zhihu.matisse.internal.model;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
+import androidx.fragment.app.FragmentActivity;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
 
 import com.zhihu.matisse.internal.loader.AlbumLoader;
 
@@ -34,6 +34,7 @@ public class AlbumCollection implements LoaderManager.LoaderCallbacks<Cursor> {
     private LoaderManager mLoaderManager;
     private AlbumCallbacks mCallbacks;
     private int mCurrentSelection;
+    private boolean mLoadFinished;
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -41,7 +42,8 @@ public class AlbumCollection implements LoaderManager.LoaderCallbacks<Cursor> {
         if (context == null) {
             return null;
         }
-        return new AlbumLoader(context);
+        mLoadFinished = false;
+        return AlbumLoader.newInstance(context);
     }
 
     @Override
@@ -51,7 +53,10 @@ public class AlbumCollection implements LoaderManager.LoaderCallbacks<Cursor> {
             return;
         }
 
-        mCallbacks.onAlbumLoad(data);
+        if (!mLoadFinished) {
+            mLoadFinished = true;
+            mCallbacks.onAlbumLoad(data);
+        }
     }
 
     @Override
@@ -83,7 +88,9 @@ public class AlbumCollection implements LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     public void onDestroy() {
-        mLoaderManager.destroyLoader(LOADER_ID);
+        if (mLoaderManager != null) {
+            mLoaderManager.destroyLoader(LOADER_ID);
+        }
         mCallbacks = null;
     }
 

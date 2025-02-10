@@ -1,7 +1,8 @@
 ![Image](/image/banner.png)
 
 # Matisse
-[![Build Status](https://travis-ci.org/zhihu/Matisse.svg)](https://travis-ci.org/zhihu/Matisse)  
+[![Build Status](https://travis-ci.org/zhihu/Matisse.svg)](https://travis-ci.org/zhihu/Matisse) [ ![Download](https://api.bintray.com/packages/zhihu/maven/matisse/images/download.svg) ](https://bintray.com/zhihu/maven/matisse/_latestVersion)
+
 Matisse is a well-designed local image and video selector for Android. You can  
 - Use it in Activity or Fragment
 - Select images including JPEG, PNG, GIF and videos including MPEG, MP4 
@@ -23,26 +24,25 @@ repositories {
 }
 
 dependencies {
-    compile 'com.zhihu.android:matisse:0.4.3'
+    implementation 'com.zhihu.android:matisse:$latest_version'
 }
 ```
+
+Check out [Matisse releases](https://github.com/zhihu/Matisse/releases) to see more unstable versions.
 
 ## ProGuard
-If you use [Glide](https://github.com/bumptech/glide) as your image engine, you may need the following rules:
+If you use [Glide](https://github.com/bumptech/glide) as your image engine, add rules as Glide's README says.  
+And add extra rule:
 ```pro
--keep public class * implements com.bumptech.glide.module.GlideModule
--keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
-  **[] $VALUES;
-  public *;
-}
+-dontwarn com.squareup.picasso.**
+```
 
-# for DexGuard only
--keepresourcexmlelements manifest/application/meta-data@value=GlideModule
-```
-If you use [Picasso](https://github.com/square/picasso) as your image engine, you may need the following rules:
+If you use [Picasso](https://github.com/square/picasso) as your image engine, add rules as Picasso's README says.  
+And add extra rule:
 ```pro
--dontwarn com.squareup.okhttp.**
+-dontwarn com.bumptech.glide.**
 ```
+**Attention**: The above progurad rules are correct.
 
 ## How do I use Matisse?
 #### Permission
@@ -66,6 +66,7 @@ Matisse.from(MainActivity.this)
         .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
         .thumbnailScale(0.85f)
         .imageEngine(new GlideEngine())
+        .showPreview(false) // Default is `true`
         .forResult(REQUEST_CODE_CHOOSE);
 ```
  
@@ -96,9 +97,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 Find more details about Matisse in [wiki](https://github.com/zhihu/Matisse/wiki).
 
 ## Contributing
- - To contribute with a small fix, simply create a pull request.
- - Better to open an issue to discuss with the team and the community if you're intended to work on something BIG. Also you can check our [roadmap](https://github.com/zhihu/Matisse/wiki/Roadmap).
- - Please follow [Code Style for Contributors](https://source.android.com/source/code-style) of AOSP.
+[Matisse is an Open Source Project](https://github.com/zhihu/Matisse/blob/master/CONTRIBUTING.md)
 
 ## Thanks
 This library is inspired by [Laevatein](https://github.com/nohana/Laevatein) and uses some of its source code.
@@ -118,3 +117,5 @@ This library is inspired by [Laevatein](https://github.com/nohana/Laevatein) and
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+
+

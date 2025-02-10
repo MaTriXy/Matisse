@@ -16,8 +16,8 @@
 package com.zhihu.matisse.internal.entity;
 
 import android.content.Context;
-import android.support.annotation.IntDef;
-import android.support.v4.app.FragmentActivity;
+import androidx.annotation.IntDef;
+import androidx.fragment.app.FragmentActivity;
 import android.widget.Toast;
 
 import com.zhihu.matisse.internal.ui.widget.IncapableDialog;
@@ -69,13 +69,14 @@ public class IncapableCause {
             case NONE:
                 // do nothing.
                 break;
-            case TOAST:
-                Toast.makeText(context, cause.mMessage, Toast.LENGTH_SHORT).show();
-                break;
             case DIALOG:
                 IncapableDialog incapableDialog = IncapableDialog.newInstance(cause.mTitle, cause.mMessage);
                 incapableDialog.show(((FragmentActivity) context).getSupportFragmentManager(),
                         IncapableDialog.class.getName());
+                break;
+            case TOAST:
+            default:
+                Toast.makeText(context, cause.mMessage, Toast.LENGTH_SHORT).show();
                 break;
         }
     }

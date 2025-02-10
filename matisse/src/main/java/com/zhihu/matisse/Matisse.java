@@ -18,8 +18,8 @@ package com.zhihu.matisse;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.zhihu.matisse.ui.MatisseActivity;
 
@@ -37,6 +37,10 @@ public final class Matisse {
 
     private Matisse(Activity activity) {
         this(activity, null);
+    }
+
+    private Matisse(Fragment fragment) {
+        this(fragment.getActivity(), fragment);
     }
 
     private Matisse(Activity activity, Fragment fragment) {
@@ -67,7 +71,7 @@ public final class Matisse {
      * @return Matisse instance.
      */
     public static Matisse from(Fragment fragment) {
-        return new Matisse(fragment.getActivity(), fragment);
+        return new Matisse(fragment);
     }
 
     /**
@@ -82,17 +86,56 @@ public final class Matisse {
     }
 
     /**
+     * Obtain user selected media path list in the starting Activity or Fragment.
+     *
+     * @param data Intent passed by {@link Activity#onActivityResult(int, int, Intent)} or
+     *             {@link Fragment#onActivityResult(int, int, Intent)}.
+     * @return User selected media path list.
+     */
+    public static List<String> obtainPathResult(Intent data) {
+        return data.getStringArrayListExtra(MatisseActivity.EXTRA_RESULT_SELECTION_PATH);
+    }
+
+    /**
+     * Obtain state whether user decide to use selected media in original
+     *
+     * @param data Intent passed by {@link Activity#onActivityResult(int, int, Intent)} or
+     *             {@link Fragment#onActivityResult(int, int, Intent)}.
+     * @return Whether use original photo
+     */
+    public static boolean obtainOriginalState(Intent data) {
+        return data.getBooleanExtra(MatisseActivity.EXTRA_RESULT_ORIGINAL_ENABLE, false);
+    }
+
+    /**
      * MIME types the selection constrains on.
      * <p>
      * Types not included in the set will still be shown in the grid but can't be chosen.
      *
-     * @param mimeType MIME types set user can choose from.
-     * @return {@link SelectionSpecBuilder} to build select specifications.
+     * @param mimeTypes MIME types set user can choose from.
+     * @return {@link SelectionCreator} to build select specifications.
      * @see MimeType
-     * @see SelectionSpecBuilder
+     * @see SelectionCreator
      */
-    public SelectionSpecBuilder choose(Set<MimeType> mimeType) {
-        return new SelectionSpecBuilder(this, mimeType);
+    public SelectionCreator choose(Set<MimeType> mimeTypes) {
+        return this.choose(mimeTypes, true);
+    }
+
+    /**
+     * MIME types the selection constrains on.
+     * <p>
+     * Types not included in the set will still be shown in the grid but can't be chosen.
+     *
+     * @param mimeTypes          MIME types set user can choose from.
+     * @param mediaTypeExclusive Whether can choose images and videos at the same time during one single choosing
+     *                           process. true corresponds to not being able to choose images and videos at the same
+     *                           time, and false corresponds to being able to do this.
+     * @return {@link SelectionCreator} to build select specifications.
+     * @see MimeType
+     * @see SelectionCreator
+     */
+    public SelectionCreator choose(Set<MimeType> mimeTypes, boolean mediaTypeExclusive) {
+        return new SelectionCreator(this, mimeTypes, mediaTypeExclusive);
     }
 
     @Nullable

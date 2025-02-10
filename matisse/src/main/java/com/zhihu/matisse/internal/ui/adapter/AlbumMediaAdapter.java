@@ -20,8 +20,8 @@ import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -90,14 +90,25 @@ public class AlbumMediaAdapter extends
             CaptureViewHolder captureViewHolder = (CaptureViewHolder) holder;
             Drawable[] drawables = captureViewHolder.mHint.getCompoundDrawables();
             TypedArray ta = holder.itemView.getContext().getTheme().obtainStyledAttributes(
-                    new int[]{R.attr.capture_color});
+                    new int[]{R.attr.capture_textColor});
             int color = ta.getColor(0, 0);
             ta.recycle();
-            for (Drawable drawable : drawables) {
+
+            for (int i = 0; i < drawables.length; i++) {
+                Drawable drawable = drawables[i];
                 if (drawable != null) {
-                    drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+                    final Drawable.ConstantState state = drawable.getConstantState();
+                    if (state == null) {
+                        continue;
+                    }
+
+                    Drawable newDrawable = state.newDrawable().mutate();
+                    newDrawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+                    newDrawable.setBounds(drawable.getBounds());
+                    drawables[i] = newDrawable;
                 }
             }
+            captureViewHolder.mHint.setCompoundDrawables(drawables[0], drawables[1], drawables[2], drawables[3]);
         } else if (holder instanceof MediaViewHolder) {
             MediaViewHolder mediaViewHolder = (MediaViewHolder) holder;
 
@@ -148,13 +159,21 @@ public class AlbumMediaAdapter extends
 
     @Override
     public void onThumbnailClicked(ImageView thumbnail, Item item, RecyclerView.ViewHolder holder) {
-        if (mOnMediaClickListener != null) {
-            mOnMediaClickListener.onMediaClick(null, item, holder.getAdapterPosition());
+        if (mSelectionSpec.showPreview) {
+            if (mOnMediaClickListener != null) {
+                mOnMediaClickListener.onMediaClick(null, item, holder.getAdapterPosition());
+            }
+        } else {
+            updateSelectedItem(item, holder);
         }
     }
 
     @Override
     public void onCheckViewClicked(CheckView checkView, Item item, RecyclerView.ViewHolder holder) {
+        updateSelectedItem(item, holder);
+    }
+
+    private void updateSelectedItem(Item item, RecyclerView.ViewHolder holder) {
         if (mSelectionSpec.countable) {
             int checkedNum = mSelectedCollection.checkedNumOf(item);
             if (checkedNum == CheckView.UNCHECKED) {
@@ -196,6 +215,7 @@ public class AlbumMediaAdapter extends
         IncapableCause.handleCause(context, cause);
         return cause == null;
     }
+
 
     public void registerCheckStateListener(CheckStateListener listener) {
         mCheckStateListener = listener;

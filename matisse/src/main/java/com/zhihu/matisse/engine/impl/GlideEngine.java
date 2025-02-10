@@ -22,6 +22,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.request.RequestOptions;
 import com.zhihu.matisse.engine.ImageEngine;
 
 /**
@@ -33,23 +34,25 @@ public class GlideEngine implements ImageEngine {
     @Override
     public void loadThumbnail(Context context, int resize, Drawable placeholder, ImageView imageView, Uri uri) {
         Glide.with(context)
+                .asBitmap() // some .jpeg files are actually gif
                 .load(uri)
-                .asBitmap()  // some .jpeg files are actually gif
-                .placeholder(placeholder)
-                .override(resize, resize)
-                .centerCrop()
+                .apply(new RequestOptions()
+                        .override(resize, resize)
+                        .placeholder(placeholder)
+                        .centerCrop())
                 .into(imageView);
     }
 
     @Override
-    public void loadAnimatedGifThumbnail(Context context, int resize, Drawable placeholder, ImageView imageView,
-                                         Uri uri) {
+    public void loadGifThumbnail(Context context, int resize, Drawable placeholder, ImageView imageView,
+                                 Uri uri) {
         Glide.with(context)
+                .asBitmap() // some .jpeg files are actually gif
                 .load(uri)
-                .asBitmap()
-                .placeholder(placeholder)
-                .override(resize, resize)
-                .centerCrop()
+                .apply(new RequestOptions()
+                        .override(resize, resize)
+                        .placeholder(placeholder)
+                        .centerCrop())
                 .into(imageView);
     }
 
@@ -57,18 +60,22 @@ public class GlideEngine implements ImageEngine {
     public void loadImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri) {
         Glide.with(context)
                 .load(uri)
-                .override(resizeX, resizeY)
-                .priority(Priority.HIGH)
+                .apply(new RequestOptions()
+                        .override(resizeX, resizeY)
+                        .priority(Priority.HIGH)
+                        .fitCenter())
                 .into(imageView);
     }
 
     @Override
-    public void loadAnimatedGifImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri) {
+    public void loadGifImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri) {
         Glide.with(context)
-                .load(uri)
                 .asGif()
-                .override(resizeX, resizeY)
-                .priority(Priority.HIGH)
+                .load(uri)
+                .apply(new RequestOptions()
+                        .override(resizeX, resizeY)
+                        .priority(Priority.HIGH)
+                        .fitCenter())
                 .into(imageView);
     }
 

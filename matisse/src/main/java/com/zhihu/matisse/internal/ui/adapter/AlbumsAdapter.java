@@ -19,7 +19,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,8 +30,6 @@ import com.zhihu.matisse.R;
 import com.zhihu.matisse.internal.entity.Album;
 import com.zhihu.matisse.internal.entity.SelectionSpec;
 
-import java.io.File;
-
 public class AlbumsAdapter extends CursorAdapter {
 
     private final Drawable mPlaceholder;
@@ -41,7 +38,7 @@ public class AlbumsAdapter extends CursorAdapter {
         super(context, c, autoRequery);
 
         TypedArray ta = context.getTheme().obtainStyledAttributes(
-                new int[]{R.attr.album_placeholder});
+                new int[]{R.attr.album_thumbnail_placeholder});
         mPlaceholder = ta.getDrawable(0);
         ta.recycle();
     }
@@ -50,7 +47,7 @@ public class AlbumsAdapter extends CursorAdapter {
         super(context, c, flags);
 
         TypedArray ta = context.getTheme().obtainStyledAttributes(
-                new int[]{R.attr.album_placeholder});
+                new int[]{R.attr.album_thumbnail_placeholder});
         mPlaceholder = ta.getDrawable(0);
         ta.recycle();
     }
@@ -69,6 +66,6 @@ public class AlbumsAdapter extends CursorAdapter {
         // do not need to load animated Gif
         SelectionSpec.getInstance().imageEngine.loadThumbnail(context, context.getResources().getDimensionPixelSize(R
                         .dimen.media_grid_size), mPlaceholder,
-                (ImageView) view.findViewById(R.id.album_cover), Uri.fromFile(new File(album.getCoverPath())));
+                (ImageView) view.findViewById(R.id.album_cover), album.getCoverUri());
     }
 }

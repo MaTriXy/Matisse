@@ -22,7 +22,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.MediaStore;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.zhihu.matisse.MimeType;
 
@@ -102,27 +102,15 @@ public class Item implements Parcelable {
     }
 
     public boolean isImage() {
-        return mimeType.equals(MimeType.JPEG.toString())
-                || mimeType.equals(MimeType.PNG.toString())
-                || mimeType.equals(MimeType.GIF.toString())
-                || mimeType.equals(MimeType.BMP.toString())
-                || mimeType.equals(MimeType.WEBP.toString());
+        return MimeType.isImage(mimeType);
     }
 
     public boolean isGif() {
-        return mimeType.equals(MimeType.GIF.toString());
+        return MimeType.isGif(mimeType);
     }
 
     public boolean isVideo() {
-        return mimeType.equals(MimeType.MPEG.toString())
-                || mimeType.equals(MimeType.MP4.toString())
-                || mimeType.equals(MimeType.QUICKTIME.toString())
-                || mimeType.equals(MimeType.THREEGPP.toString())
-                || mimeType.equals(MimeType.THREEGPP2.toString())
-                || mimeType.equals(MimeType.MKV.toString())
-                || mimeType.equals(MimeType.WEBM.toString())
-                || mimeType.equals(MimeType.TS.toString())
-                || mimeType.equals(MimeType.AVI.toString());
+        return MimeType.isVideo(mimeType);
     }
 
     @Override
@@ -132,14 +120,22 @@ public class Item implements Parcelable {
         }
 
         Item other = (Item) obj;
-        return other.uri.equals(uri);
+        return id == other.id
+                && (mimeType != null && mimeType.equals(other.mimeType)
+                    || (mimeType == null && other.mimeType == null))
+                && (uri != null && uri.equals(other.uri)
+                    || (uri == null && other.uri == null))
+                && size == other.size
+                && duration == other.duration;
     }
 
     @Override
     public int hashCode() {
         int result = 1;
         result = 31 * result + Long.valueOf(id).hashCode();
-        result = 31 * result + mimeType.hashCode();
+        if (mimeType != null) {
+            result = 31 * result + mimeType.hashCode();
+        }
         result = 31 * result + uri.hashCode();
         result = 31 * result + Long.valueOf(size).hashCode();
         result = 31 * result + Long.valueOf(duration).hashCode();
